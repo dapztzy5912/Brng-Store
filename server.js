@@ -7,6 +7,12 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 30002;
 
+// WhatsApp configuration
+const WHATSAPP_CONFIG = {
+    number: '263780379588', // Ganti dengan nomor WhatsApp Anda (format: 62xxx tanpa +)
+    storeName: 'BORING STORE' // Nama toko Anda
+};
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -43,19 +49,20 @@ let products = [
     {
         id: uuidv4(),
         name: "testing",
-        price: 15.000,
+        price: 15000,
         images: ["/images/placeholder1.png", "/images/placeholder2.png"],
         description: "ini hanya testing yaw bukan untuk publoc,."
     },
     {
         id: uuidv4(),
         name: "robux",
-        price: 10.000,
+        price: 10000,
         images: ["/images/placeholder3.png"],
         description: "kami sebagai pemula menyediakan layanan, seperti panel pterodactyl, vps, akum free fire, dan robux atau roblox."
     }
 ];
 
+// API Routes
 app.get('/api/products', (req, res) => {
     res.json(products);
 });
@@ -67,6 +74,38 @@ app.get('/api/products/:id', (req, res) => {
     } else {
         res.status(404).json({ message: 'Produk tidak ditemukan' });
     }
+});
+
+// WhatsApp configuration endpoint
+app.get('/api/whatsapp-number', (req, res) => {
+    res.json({ 
+        number: WHATSAPP_CONFIG.number,
+        storeName: WHATSAPP_CONFIG.storeName
+    });
+});
+
+// Update WhatsApp configuration (optional - untuk admin)
+app.put('/api/whatsapp-config', (req, res) => {
+    const { number, storeName } = req.body;
+    
+    if (number) {
+        // Validasi format nomor WhatsApp
+        const cleanNumber = number.replace(/\D/g, ''); // Hapus semua karakter non-digit
+        if (cleanNumber.length >= 10 && cleanNumber.length <= 15) {
+            WHATSAPP_CONFIG.number = cleanNumber;
+        } else {
+            return res.status(400).json({ message: 'Format nomor WhatsApp tidak valid' });
+        }
+    }
+    
+    if (storeName) {
+        WHATSAPP_CONFIG.storeName = storeName;
+    }
+    
+    res.json({ 
+        message: 'Konfigurasi WhatsApp berhasil diperbarui',
+        config: WHATSAPP_CONFIG
+    });
 });
 
 app.post('/api/products', upload.array('product-images', 10), (req, res) => {
@@ -121,13 +160,11 @@ app.put('/api/products/:id', upload.array('product-images', 10), (req, res) => {
             finalImages = [existingImages];
         }
 
-
         if (req.files && req.files.length > 0) {
             const newImagePaths = req.files.map(file => `/uploads/${file.filename}`);
             finalImages = finalImages.concat(newImagePaths);
         }
         updatedProduct.images = finalImages.length > 0 ? finalImages : products[productIndex].images;
-
 
         products[productIndex] = updatedProduct;
         res.json(updatedProduct);
@@ -167,8 +204,9 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-
 app.listen(PORT, () => {
     console.log(`Server berjalan di http://localhost:${PORT}`);
     console.log(`Halaman admin: http://localhost:${PORT}/a5ujemb0t.html`);
+    console.log(`WhatsApp Number: ${WHATSAPP_CONFIG.number}`);
+    console.log(`Store Name: ${WHATSAPP_CONFIG.storeName}`);
 });
