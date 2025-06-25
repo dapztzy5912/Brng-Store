@@ -9,6 +9,7 @@
         :root {
             --primary-color: #3498db;
             --secondary-color: #2ecc71;
+            --whatsapp-color: #25d366;
             --light-gray: #f4f4f4;
             --dark-gray: #2c3e50;
             --text-color: #34495e;
@@ -44,9 +45,21 @@
             padding: 0.8rem 1.6rem; border: none; border-radius: var(--border-radius);
             cursor: pointer; text-decoration: none; font-size: 0.95rem; font-weight: 500;
             transition: background-color 0.3s ease, transform 0.2s ease; text-align: center;
+            margin-right: 1rem; margin-bottom: 0.5rem;
         }
         .btn:hover { background: #2980b9; transform: translateY(-2px); }
         .btn i { margin-right: 8px; }
+
+        .btn.whatsapp-btn {
+            background: var(--whatsapp-color);
+            font-size: 1.1rem;
+            padding: 1rem 2rem;
+        }
+        .btn.whatsapp-btn:hover {
+            background: #1da851;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+        }
 
         .product-detail {
             background: var(--card-bg); padding: 2.5rem; border-radius: var(--border-radius);
@@ -72,6 +85,14 @@
         .product-content h2 { font-size: 2.3rem; color: var(--dark-gray); margin-bottom: 0.8rem; font-weight: 600; }
         .product-content .price { font-size: 1.9rem; color: var(--secondary-color); font-weight: bold; margin-bottom: 1.2rem; }
         .product-content .description { font-size: 1.05rem; color: var(--text-color); margin-bottom: 1.8rem; white-space: pre-wrap; line-height: 1.8; }
+        
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
         .back-button { background-color: var(--dark-gray); }
         .back-button:hover { background-color: #34495e; }
         .loading, .error-message { text-align: center; font-size: 1.3rem; padding: 2.5rem; color: var(--text-color); }
@@ -89,12 +110,21 @@
         .bottom-nav a:hover { color: var(--primary-color); transform: translateY(-2px); }
         .bottom-nav a.active { color: var(--secondary-color); font-weight: bold; }
         .bottom-nav a i { display: block; font-size: 1.6em; margin-bottom: 5px; }
+
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+            }
+            .btn {
+                margin-right: 0;
+            }
+        }
     </style>
 </head>
 <body>
     <header>
         <div class="container">
-            <h1><i class="fas fa-store"></i> my shop dapxd</h1>
+            <h1><i class="fas fa-store"></i> my shop boring</h1>
             <div class="profile">
                 <img src="/images/9f973a6f6620605c2deabf2573795dfd.jpg" alt="Profile">
             </div>
@@ -108,7 +138,7 @@
 
     <footer>
         <div class="container">
-            <p>© only dapxd.</p>
+            <p>© only boring.</p>
         </div>
     </footer>
 
@@ -122,6 +152,40 @@
 
         const formatPrice = (price) => {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
+        };
+
+        const createWhatsAppMessage = (productName, productPrice) => {
+            const formattedPrice = formatPrice(productPrice);
+            const message = `Halo kak! 😊
+Saya tertarik untuk membeli produk dari BORING STORE:
+📦 *${productName}*
+💰 *${formattedPrice}*
+Apakah produk ini masih tersedia? Bisa tolong bantu proses pembeliannya?
+Terima kasih! 🙏`;
+            return encodeURIComponent(message);
+        };
+
+        const openWhatsApp = async (productName, productPrice) => {
+            try {
+                // Ambil nomor WhatsApp dari server
+                const response = await fetch('/api/whatsapp-number');
+                let whatsappNumber = '263780379588'; // Default fallback number
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    whatsappNumber = data.number;
+                }
+
+                const message = createWhatsAppMessage(productName, productPrice);
+                const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
+                window.open(whatsappUrl, '_blank');
+            } catch (error) {
+                console.error('Error opening WhatsApp:', error);
+                // Fallback jika ada error
+                const message = createWhatsAppMessage(productName, productPrice);
+                const whatsappUrl = `https://wa.me/6281234567890?text=${message}`;
+                window.open(whatsappUrl, '_blank');
+            }
         };
 
         const displayProductDetail = async () => {
@@ -164,9 +228,19 @@
                         <h2>${product.name}</h2>
                         <p class="price">${formatPrice(product.price)}</p>
                         <p class="description">${product.description || 'Tidak ada deskripsi.'}</p>
-                        <button onclick="window.history.back()" class="btn back-button"><i class="fas fa-arrow-left"></i> Kembali</button>
+                        <div class="action-buttons">
+                            <button onclick="openWhatsApp('${product.name.replace(/'/g, "\\'")}', ${product.price})" class="btn whatsapp-btn">
+                                <i class="fab fa-whatsapp"></i> Beli Sekarang
+                            </button>
+                            <button onclick="window.history.back()" class="btn back-button">
+                                <i class="fas fa-arrow-left"></i> Kembali
+                            </button>
+                        </div>
                     </div>
                 `;
+
+                // Make openWhatsApp function available globally
+                window.openWhatsApp = openWhatsApp;
             } catch (error) {
                 console.error('Gagal memuat detail produk:', error);
                 productDetailContainer.innerHTML = `<p class="error-message"><i class="fas fa-exclamation-triangle"></i> Gagal memuat detail produk. (${error.message})</p>`;
