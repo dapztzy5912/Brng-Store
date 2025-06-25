@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>product detail</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --light-gray: #f4f4f4;
+            --dark-gray: #2c3e50;
+            --text-color: #34495e;
+            --card-bg: #ffffff;
+            --shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            --border-radius: 10px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-bottom: 70px;
+        }
+        .container { width: 90%; max-width: 1100px; margin: auto; padding: 0 15px; }
+        header {
+            background: linear-gradient(135deg, var(--primary-color), #5dade2);
+            color: #fff;
+            padding: 1.2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        header .container { display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 2.2rem; font-weight: 600; }
+        .profile img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 0 8px rgba(0,0,0,0.2); }
+        main.container { padding: 2.5rem 15px; flex-grow: 1; }
+        .btn {
+            display: inline-block; background: var(--primary-color); color: #fff;
+            padding: 0.8rem 1.6rem; border: none; border-radius: var(--border-radius);
+            cursor: pointer; text-decoration: none; font-size: 0.95rem; font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease; text-align: center;
+        }
+        .btn:hover { background: #2980b9; transform: translateY(-2px); }
+        .btn i { margin-right: 8px; }
+
+        .product-detail {
+            background: var(--card-bg); padding: 2.5rem; border-radius: var(--border-radius);
+            box-shadow: var(--shadow); display: grid; grid-template-columns: 1fr; gap: 2.5rem;
+        }
+        @media (min-width: 768px) { .product-detail { grid-template-columns: 0.8fr 1.2fr; } }
+        .product-image-gallery { display: flex; flex-direction: column; align-items: center; }
+        .product-image-gallery .main-image-container {
+            width: 100%; max-width: 450px; height: 350px;
+            border: 1px solid #ecf0f1; border-radius: var(--border-radius);
+            overflow: hidden; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center;
+            background-color: #f8f9fa;
+        }
+        .product-image-gallery .main-image-container img { width: 100%; height: 100%; object-fit: contain; }
+        .product-image-gallery .main-image-container .img-placeholder { font-style: italic; color: #adb5bd; font-size: 1.1em; }
+        .thumbnails { display: flex; gap: 0.8rem; flex-wrap: wrap; justify-content: center; }
+        .thumbnails img {
+            width: 80px; height: 80px; object-fit: cover; border: 3px solid transparent;
+            border-radius: 6px; cursor: pointer; transition: border-color 0.3s ease, transform 0.2s ease;
+        }
+        .thumbnails img:hover { transform: scale(1.05); }
+        .thumbnails img.active { border-color: var(--primary-color); box-shadow: 0 0 8px rgba(52, 152, 219, 0.5); }
+        .product-content h2 { font-size: 2.3rem; color: var(--dark-gray); margin-bottom: 0.8rem; font-weight: 600; }
+        .product-content .price { font-size: 1.9rem; color: var(--secondary-color); font-weight: bold; margin-bottom: 1.2rem; }
+        .product-content .description { font-size: 1.05rem; color: var(--text-color); margin-bottom: 1.8rem; white-space: pre-wrap; line-height: 1.8; }
+        .back-button { background-color: var(--dark-gray); }
+        .back-button:hover { background-color: #34495e; }
+        .loading, .error-message { text-align: center; font-size: 1.3rem; padding: 2.5rem; color: var(--text-color); }
+        .error-message { color: #e74c3c; }
+        footer { text-align: center; padding: 1.5rem 0; background: var(--dark-gray); color: var(--light-gray); margin-top: 2rem; }
+
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background-color: var(--dark-gray);
+            display: flex; justify-content: space-around;
+            padding: 12px 0; box-shadow: 0 -3px 8px rgba(0,0,0,0.25); z-index: 1001;
+            border-top: 2px solid var(--primary-color);
+        }
+        .bottom-nav a { color: white; text-decoration: none; text-align: center; font-size: 0.85em; flex-grow: 1; padding: 5px 0; transition: color 0.2s, transform 0.2s; }
+        .bottom-nav a:hover { color: var(--primary-color); transform: translateY(-2px); }
+        .bottom-nav a.active { color: var(--secondary-color); font-weight: bold; }
+        .bottom-nav a i { display: block; font-size: 1.6em; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-store"></i> my shop dapxd</h1>
+            <div class="profile">
+                <img src="/images/profile.jpg" alt="Profile">
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="product-detail" id="product-detail">
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© only dapxd.</p>
+        </div>
+    </footer>
+
+    <nav class="bottom-nav">
+        <a href="/index.html"><i class="fas fa-home"></i> shop</a>
+        <a href="/a5ujemb0t.html"><i class="fas fa-user-shield"></i> Admin</a>
+        <a href="#"><i class="fas fa-shopping-cart"></i> Cart</a>
+        <a href="#"><i class="fas fa-user-circle"></i> Profile</a>
+    </nav>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const productDetailContainer = document.getElementById('product-detail');
+
+        const formatPrice = (price) => {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
+        };
+
+        const displayProductDetail = async () => {
+            if (!productDetailContainer) return;
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+
+            if (!productId) {
+                productDetailContainer.innerHTML = '<p class="error-message"><i class="fas fa-exclamation-circle"></i> ID Produk tidak ditemukan.</p>';
+                return;
+            }
+
+            productDetailContainer.innerHTML = '<p class="loading"><i class="fas fa-spinner fa-spin"></i> Memuat detail produk...</p>';
+            try {
+                const response = await fetch(`/api/products/${productId}`);
+                if (!response.ok) {
+                     if (response.status === 404) throw new Error('Produk tidak ditemukan.');
+                     throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const product = await response.json();
+
+                productDetailContainer.innerHTML = `
+                    <div class="product-image-gallery">
+                        <div class="main-image-container">
+                            ${product.images && product.images.length > 0 ?
+                                `<img src="${product.images[0]}" alt="${product.name}" id="main-product-image">` :
+                                `<div class="img-placeholder">Tanpa Gambar</div>`
+                            }
+                        </div>
+                        ${product.images && product.images.length > 1 ? `
+                            <div class="thumbnails">
+                                ${product.images.map((img, index) => `
+                                    <img src="${img}" alt="Thumbnail ${index + 1}" class="${index === 0 ? 'active' : ''}" onclick="changeMainImage(this, '${img}')">
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="product-content">
+                        <h2>${product.name}</h2>
+                        <p class="price">${formatPrice(product.price)}</p>
+                        <p class="description">${product.description || 'Tidak ada deskripsi.'}</p>
+                        <button onclick="window.history.back()" class="btn back-button"><i class="fas fa-arrow-left"></i> Kembali</button>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Gagal memuat detail produk:', error);
+                productDetailContainer.innerHTML = `<p class="error-message"><i class="fas fa-exclamation-triangle"></i> Gagal memuat detail produk. (${error.message})</p>`;
+            }
+        };
+        
+        window.changeMainImage = (thumbElement, newImageSrc) => {
+            const mainImage = document.getElementById('main-product-image');
+            if (mainImage) mainImage.src = newImageSrc;
+
+            document.querySelectorAll('.thumbnails img').forEach(thumb => {
+                thumb.classList.remove('active');
+            });
+            if(thumbElement) thumbElement.classList.add('active');
+        };
+
+        if (productDetailContainer) {
+            displayProductDetail();
+        }
+    });
+    </script>
+</body>
+</html>
